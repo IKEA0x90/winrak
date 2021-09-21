@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from sys import argv
 from os import path
 from typing import Type
@@ -39,13 +41,17 @@ def create_rak(packed: list, name, filetype):
         name: string - name of the file
         filetype: string - filetype
     '''
-    file = open(name + '.rak', 'w')
-    data = ''
-    for list in packed:
-        data += str(list[0])
-        data += str(list[1])
-    file.write(filetype + "\n" + data)
-    file.close()
+    try:
+        file = open(name + '.rak', 'w')
+        data = ''
+        for list in packed:
+            data += str(list[0])
+            data += str(list[1])
+        file.write(filetype + "\n" + data)
+        file.close()
+    except OSError as ose:
+        print(str(ose))
+        exit(0)
 
 def unpack(packed):
     '''
@@ -55,12 +61,19 @@ def unpack(packed):
     @return:
         unpacked: list
     '''
-    unpacked = []
-    for i in range(0, len(packed) - 1, 2):
-        bitm = int(packed[i])
-        for j in range(int(packed[i + 1])):
-            unpacked.append(bitm)
-    return unpacked
+    try:
+        unpacked = []
+        for i in range(0, len(packed) - 1, 2):
+            bitm = int(packed[i])
+            for j in range(int(packed[i + 1])):
+                unpacked.append(bitm)
+        return unpacked
+    except ValueError:
+        print("Archive corrupt, cannot unpack.")
+        exit(0)
+    except IndexError:
+        print("Archive corrupt, cannot unpack.")
+        exit(0)
 
     
 def create_unpacked(unpacked: list, name, filetype):
@@ -71,12 +84,16 @@ def create_unpacked(unpacked: list, name, filetype):
         name: string - name
         filetype: string - filetype
     '''
-    Bytes = numpy.packbits(numpy.asarray(unpacked))
-    Bytes = numpy.asarray(Bytes)
-    filename = (name + filetype).strip()
-    file = open(filename, "wb")
-    Bytes.tofile(file)
-    file.close()
+    try:
+        Bytes = numpy.packbits(numpy.asarray(unpacked))
+        Bytes = numpy.asarray(Bytes)
+        filename = (name + filetype).strip()
+        file = open(filename, "wb")
+        Bytes.tofile(file)
+        file.close()
+    except OSError as ose:
+        print(str(ose))
+        exit(0)
 
 def help():
     '''
